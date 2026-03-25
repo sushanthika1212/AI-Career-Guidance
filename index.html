@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Career Guidance</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .container {
+            background: white;
+            color: black;
+            padding: 20px;
+            border-radius: 15px;
+            width: 350px;
+            margin: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        input {
+            margin: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>🎯 AI Career Guidance System</h2>
+
+<!-- STEP 1 -->
+<div class="container" id="step1">
+    <h3>Select Interests</h3>
+
+    <input type="checkbox" value="coding"> Coding<br>
+    <input type="checkbox" value="art"> Art<br>
+    <input type="checkbox" value="business"> Business<br>
+    <input type="checkbox" value="construction"> Construction<br>
+    <input type="checkbox" value="electrical"> Electrical<br>
+    <input type="checkbox" value="communication systems"> Communication Systems<br>
+    <input type="checkbox" value="mechanical"> Mechanical<br>
+    <input type="checkbox" value="robotics"> Robotics<br>
+    <input type="checkbox" value="chemicals"> Chemicals<br><br>
+
+    <button onclick="goToScore()">Next ➡️</button>
+</div>
+
+<!-- STEP 2: SCORES -->
+<div class="container" id="stepScore" style="display:none;">
+    <h3>Enter Academic Scores</h3>
+
+    Maths (out of 150):<br>
+    <input type="number" id="math"><br>
+
+    Physics (out of 120):<br>
+    <input type="number" id="physics"><br>
+
+    Chemistry (out of 120):<br>
+    <input type="number" id="chem"><br><br>
+
+    <button onclick="goToAchievements()">Next ➡️</button>
+</div>
+
+<!-- STEP 3: ACHIEVEMENTS -->
+<div class="container" id="step2" style="display:none;">
+    <h3>Enter Achievements</h3>
+    <div id="achievementFields"></div>
+
+    <button onclick="predict()">Get Career Suggestion 🚀</button>
+</div>
+
+<!-- RESULT -->
+<div class="container" id="resultBox" style="display:none;">
+    <h3 id="result"></h3>
+</div>
+
+<script>
+let selectedInterests = [];
+
+function goToScore() {
+    let checkboxes = document.querySelectorAll("input[type=checkbox]:checked");
+
+    if (checkboxes.length === 0) {
+        alert("Select at least one interest");
+        return;
+    }
+
+    selectedInterests = [];
+    checkboxes.forEach(cb => selectedInterests.push(cb.value));
+
+    document.getElementById("step1").style.display = "none";
+    document.getElementById("stepScore").style.display = "block";
+}
+
+function goToAchievements() {
+    let math = document.getElementById("math").value;
+    let physics = document.getElementById("physics").value;
+    let chem = document.getElementById("chem").value;
+
+    if (!math || !physics || !chem) {
+        alert("Please enter all scores");
+        return;
+    }
+
+    let container = document.getElementById("achievementFields");
+    container.innerHTML = "";
+
+    selectedInterests.forEach((item, index) => {
+        let label = document.createElement("label");
+        label.innerText = item + " achievements: ";
+
+        let input = document.createElement("input");
+        input.type = "number";
+        input.id = "ach_" + index;
+
+        container.appendChild(label);
+        container.appendChild(input);
+        container.appendChild(document.createElement("br"));
+    });
+
+    document.getElementById("stepScore").style.display = "none";
+    document.getElementById("step2").style.display = "block";
+}
+
+function predict() {
+
+    let math = document.getElementById("math").value / 150;
+    let physics = document.getElementById("physics").value / 120;
+    let chem = document.getElementById("chem").value / 120;
+
+    let scores = {
+        "Software Engineer": 0,
+        "Artist / Designer": 0,
+        "Business Analyst": 0,
+        "Civil Engineer": 0,
+        "Electrical Engineer": 0,
+        "Electronics & Communication Engineer": 0,
+        "Mechanical Engineer": 0,
+        "Robotics Engineer": 0,
+        "Chemical Engineer": 0
+    };
+
+    selectedInterests.forEach((item, index) => {
+        let ach = parseInt(document.getElementById("ach_" + index).value) || 0;
+
+        if (item === "coding") {
+            scores["Software Engineer"] += ach + (math * 3);
+        }
+
+        if (item === "art") {
+            scores["Artist / Designer"] += ach + 2;
+        }
+
+        if (item === "business") {
+            scores["Business Analyst"] += ach + 2;
+        }
+
+        if (item === "construction") {
+            scores["Civil Engineer"] += ach + (physics * 2);
+        }
+
+        if (item === "electrical") {
+            scores["Electrical Engineer"] += ach + (physics * 3);
+        }
+
+        if (item === "communication systems") {
+            scores["Electronics & Communication Engineer"] += ach + (physics * 3);
+        }
+
+        if (item === "mechanical") {
+            scores["Mechanical Engineer"] += ach + (physics * 2);
+        }
+
+        if (item === "robotics") {
+            scores["Robotics Engineer"] += ach + (math * 2 + physics * 2);
+        }
+
+        if (item === "chemicals") {
+            scores["Chemical Engineer"] += ach + (chem * 3);
+        }
+    });
+
+    let total = Object.values(scores).reduce((a,b)=>a+b,0);
+
+    let resultText = "📊 Career Probabilities:\n\n";
+
+    for (let k in scores) {
+        let p = total === 0 ? 0 : ((scores[k]/total)*100).toFixed(2);
+        resultText += k + " : " + p + "%\n";
+    }
+
+    let best = Object.keys(scores).reduce((a,b)=>scores[a]>scores[b]?a:b);
+
+    resultText += "\n🎯 Suggested Career: " + best;
+
+    document.getElementById("result").innerText = resultText;
+
+    document.getElementById("step2").style.display = "none";
+    document.getElementById("resultBox").style.display = "block";
+}
+</script>
+
+</body>
+</html>
